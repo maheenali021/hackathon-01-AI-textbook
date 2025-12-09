@@ -1,0 +1,220 @@
+/**
+ * CSS files with the .module.css suffix will be treated as CSS modules
+ * locally scoped CSS for the component
+ */
+
+.heroBanner {
+  padding: 4rem 0;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0d2f7e 0%, #1e293b 100%); /* Electric blue to navy blue */
+  color: white;
+}
+
+/* Container for two-column layout */
+.heroContainer {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.heroImage {
+  flex: 1;
+  min-width: 0;
+}
+
+.coverImage {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  max-width: 100%;
+  display: block;
+}
+
+.heroText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+@media screen and (max-width: 996px) {
+  .heroBanner {
+    padding: 2rem;
+  }
+
+  .heroContainer {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+
+  .heroImage, .heroText {
+    flex: none;
+    width: 100%;
+  }
+
+  .coverImage {
+    max-width: 80%;
+    margin: 0 auto;
+  }
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.buttons .button {
+  margin: 0.5rem;
+}
+
+.features {
+  display: flex;
+  align-items: center;
+  padding: 2rem 0;
+  width: 100%;
+}
+
+.featureSvg {
+  height: 200px;
+  width: 200px;
+}
+
+/* Dark theme specific styles */
+html[data-theme='dark'] .heroBanner {
+  background: linear-gradient(135deg, #0d2f7e 0%, #1e293b 100%); /* Electric blue to navy blue */
+  color: #ffffff;
+}
+
+html[data-theme='dark'] .heroBanner h1 {
+  color: #ffffff;
+}
+
+html[data-theme='dark'] .heroBanner p {
+  color: #cccccc;
+}
+
+/* Card styles for features */
+.feature-card {
+  background: #1e1e1e;
+  border-radius: 12px;
+  padding: 2rem;
+  margin: 1rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid #333;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme='dark'] .feature-card {
+  background: #252525;
+  border: 1px solid #444;
+}
+
+/* Button styles for dark theme */
+html[data-theme='dark'] .button--secondary {
+  background-color: #2d3748;
+  border-color: #4a5568;
+  color: #fff;
+}
+
+html[data-theme='dark'] .button--secondary:hover {
+  background-color: #4a5568;
+  border-color: #718096;
+}
+
+html[data-theme='dark'] .button--primary {
+  background-color: #3182ce;
+  border-color: #3182ce;
+  color: #fff;
+}
+
+html[data-theme='dark'] .button--primary:hover {
+  background-color: #2c5282;
+  border-color: #2c5282;
+}
+
+/* Custom grid layout */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+  width: 100%;
+}
+
+/* Animation for hero text */
+.hero__title {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+
+html[data-theme='dark'] .hero__title {
+  background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+
+.hero__subtitle {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  color: #a0aec0;
+}
+
+html[data-theme='dark'] .hero__subtitle {
+  color: #a0aec0;
+}
+
+/* Module cards styling */
+.module-card {
+  background: linear-gradient(145deg, #2d2d2d, #1e1e1e);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  border: 1px solid #333;
+  transition: all 0.3s ease;
+}
+
+.module-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  border-color: #4a5568;
+}
+
+.module-card h3 {
+  color: #667eea;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+html[data-theme='dark'] .module-card h3 {
+  color: #667eea;
+}
+
+.module-card p {
+  color: #cbd5e0;
+  line-height: 1.6;
+}
+
+html[data-theme='dark'] .module-card p {
+  color: #cbd5e0;
+}

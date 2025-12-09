@@ -1,0 +1,154 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Docusaurus build outputs
+build/
+dist/
+.nyc_output/
+coverage/
+.nyc_output/
+
+# Environment variables
+.env*
+!.env.example
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# Temporary folders
+tmp/
+temp/
+
+# Docusaurus cache
+.cache/
+.docusaurus/
+
+# Editor temporary files
+*.tmp
+*.bak
+
+# Local environment
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Next.js
+.next/
+out/
+
+# Backend specific (if needed in future)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git/
+
+# Python
+.pytest_cache/
+.hypothesis/
+.coverage*
+.pytest/
+.pydevproject
+
+# Build outputs
+*.o
+*.so
+*.a
+*.exe
+*.dll
+*.class
+*.jar
+*.war
+*.ear
+*.tar.gz
+*.zip
+
+# Testing
+coverage/
+junit.xml
+*.gcda
+*.gcno
+*.gcov
+
+# IDE
+.vs/
+*.user
+*.userosscache
+*.suo
+*.csproj.user
+*.cache
+*.VC.db
+*.VC.VC.opendb
+*.VC.VC.opendb-shm
+*.VC.VC.opendb-wal
+*.VC.VC.opendb-shm
+*.VC.VC.opendb-wal
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.com.apple.receipts.bom
+.com.apple.QuickTimePlayerX.savedstate
+.CFUserTextEncoding
+.apdisk
+.fseventsd
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Icon?
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk

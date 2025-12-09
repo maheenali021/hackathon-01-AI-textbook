@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir \"C:\\Users\\Dell\\Desktop\\maheen\\agents\\hackathon-01-AI-textbook\\.specify\\memory\"\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

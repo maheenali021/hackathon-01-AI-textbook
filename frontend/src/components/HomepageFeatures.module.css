@@ -1,0 +1,105 @@
+.features {
+  display: flex;
+  align-items: center;
+  padding: 2rem 0;
+  width: 100%;
+  background-color: #f8fafc;
+}
+
+html[data-theme='dark'] .features {
+  background-color: #0d0d0d;
+}
+
+.featureSvg {
+  height: 200px;
+  width: 200px;
+}
+
+/* Dark theme specific styles for features */
+html[data-theme='dark'] h3 {
+  color: #667eea;
+}
+
+html[data-theme='dark'] p {
+  color: #cbd5e0;
+}
+
+/* Card styling for features */
+.col {
+  padding: 1rem;
+}
+
+.text--center {
+  text-align: center;
+}
+
+.padding-horiz--md {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* Grid layout for features */
+.row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  width: 100%;
+}
+
+/* Individual feature card styling */
+.col > div {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  height: 100%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+html[data-theme='dark'] .col > div {
+  background: #1e1e1e;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.col > div:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+html[data-theme='dark'] .col > div:hover {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+/* Feature title styling */
+.col h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #3643a6;
+}
+
+html[data-theme='dark'] .col h3 {
+  color: #667eea;
+}
+
+/* Feature description styling */
+.col p {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #4a5568;
+}
+
+html[data-theme='dark'] .col p {
+  color: #123459;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 996px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+
+  .col {
+    padding: 0.5rem;
+  }
+}

@@ -1,0 +1,356 @@
+/**
+ * Custom CSS for Physical AI & Humanoid Robotics Educational Book
+ * Enhanced dark theme styling with new font and color scheme
+ */
+
+/* Font and color overrides */
+:root {
+  /* New color scheme - Robotics theme */
+  --ifm-color-primary: #2563eb;
+  --ifm-color-primary-dark: #1d4ed8;
+  --ifm-color-primary-darker: #1e40af;
+  --ifm-color-primary-darkest: #1e3a8a;
+  --ifm-color-primary-light: #3b82f6;
+  --ifm-color-primary-lighter: #60a5fa;
+  --ifm-color-primary-lightest: #93c5fd;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+
+  /* Custom colors for robotics theme */
+  --robotics-blue: #2563eb;
+  --robotics-purple: #7c3aed;
+  --robotics-teal: #0d9488;
+  --robotics-gray: #64748b;
+  --robotics-orange: #ea580c;
+  --robotics-green: #16a34a;
+
+  /* Card and container styling */
+  --ifm-card-background-color: #ffffff;
+  --ifm-card-border-radius: 12px;
+  --ifm-card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  /* New font family */
+  --ifm-font-family-base: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* New font import */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Apply new font globally */
+body {
+  font-family: var(--ifm-font-family-base);
+  font-weight: 400;
+}
+
+/* Dark theme */
+html[data-theme='dark'] {
+  --ifm-color-primary: #3b82f6;
+  --ifm-color-primary-dark: #2563eb;
+  --ifm-color-primary-darker: #1d4ed8;
+  --ifm-color-primary-darkest: #1e3a8a;
+  --ifm-color-primary-light: #60a5fa;
+  --ifm-color-primary-lighter: #93c5fd;
+  --ifm-color-primary-lightest: #bfdbfe;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+
+  /* Dark theme specific colors */
+  --ifm-background-color: #0f172a;
+  --ifm-background-surface-color: #1e293b;
+  --ifm-card-background-color: #1e293b;
+  --ifm-font-color-base: #e2e8f0;
+  --ifm-font-color-base-inverse: #1a202c;
+  --ifm-border-color: #334155;
+  --ifm-code-background: #334155;
+  --ifm-navbar-background-color: #1e293b;
+  --ifm-footer-background-color: #1e293b;
+  --ifm-menu-background-color: #1e293b;
+  --ifm-sidebar-background-color: #1e293b;
+}
+
+/* Enhanced dark theme styling for all components */
+
+/* Code block styling */
+.code-block {
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-family: var(--ifm-font-family-base);
+}
+
+html[data-theme='dark'] .code-block {
+  background-color: #334155;
+  border: 1px solid #475569;
+}
+
+/* Card styling */
+.card {
+  border-radius: var(--ifm-card-border-radius);
+  box-shadow: var(--ifm-card-shadow);
+  border: 1px solid var(--ifm-border-color);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  font-family: var(--ifm-font-family-base);
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+html[data-theme='dark'] .card {
+  background-color: var(--ifm-card-background-color);
+  border: 1px solid #475569;
+}
+
+/* Button styling */
+.button {
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  font-family: var(--ifm-font-family-base);
+}
+
+.button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Navbar styling */
+.navbar {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-family: var(--ifm-font-family-base);
+}
+
+html[data-theme='dark'] .navbar {
+  background-color: var(--ifm-navbar-background-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Sidebar styling */
+.menu {
+  border-right: 1px solid var(--ifm-border-color);
+  font-family: var(--ifm-font-family-base);
+}
+
+html[data-theme='dark'] .menu {
+  background-color: var(--ifm-menu-background-color);
+}
+
+/* Footer styling */
+.footer {
+  background-color: var(--ifm-footer-background-color);
+  border-top: 1px solid var(--ifm-border-color);
+  font-family: var(--ifm-font-family-base);
+}
+
+/* Hero banner styling */
+.hero {
+  background: linear-gradient(135deg, #1e293b 0%, #0d2f7e 100%);
+  color: white;
+  font-family: var(--ifm-font-family-base);
+}
+
+html[data-theme='dark'] .hero {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #ffffff;
+}
+
+/* Gradient text styling */
+.gradient-text {
+  background: linear-gradient(45deg, var(--robotics-purple) 0%, var(--robotics-blue) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+
+/* Feature card styling */
+.feature-card {
+  background: linear-gradient(145deg, #334155, #1e293b);
+  border-radius: 12px;
+  padding: 2rem;
+  margin: 1rem 0;
+  border: 1px solid #475569;
+  transition: all 0.3s ease;
+  font-family: var(--ifm-font-family-base);
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  border-color: #60a5fa;
+}
+
+/* Module card styling */
+.module-card {
+  background: linear-gradient(145deg, #334155, #1e293b);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  border: 1px solid #475569;
+  transition: all 0.3s ease;
+  font-family: var(--ifm-font-family-base);
+}
+
+.module-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  border-color: #60a5fa;
+}
+
+/* Link styling */
+.navbar__link,
+.menu__link,
+.table-of-contents__link {
+  transition: color 0.2s ease;
+  font-family: var(--ifm-font-family-base);
+}
+
+.navbar__link:hover,
+.menu__link:hover,
+.table-of-contents__link:hover {
+  color: var(--ifm-color-primary-light);
+}
+
+/* Responsive adjustments */
+@media (max-width: 996px) {
+  .hero {
+    padding: 2rem 1rem;
+  }
+
+  .feature-card,
+  .module-card {
+    margin: 0.5rem 0;
+    padding: 1.5rem;
+  }
+}
+
+/* Custom scrollbar for dark theme */
+html[data-theme='dark'] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+html[data-theme='dark'] ::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+html[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 4px;
+}
+
+html[data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
+  background: #3b82f6;
+}
+
+/* Enhanced code block syntax highlighting for dark theme */
+html[data-theme='dark'] .token.comment,
+html[data-theme='dark'] .token.block-comment,
+html[data-theme='dark'] .token.prolog,
+html[data-theme='dark'] .token.doctype,
+html[data-theme='dark'] .token.cdata {
+  color: #94a3b8;
+}
+
+html[data-theme='dark'] .token.punctuation {
+  color: #cbd5e1;
+}
+
+html[data-theme='dark'] .token.property,
+html[data-theme='dark'] .token.tag,
+html[data-theme='dark'] .token.boolean,
+html[data-theme='dark'] .token.number,
+html[data-theme='dark'] .token.constant,
+html[data-theme='dark'] .token.symbol,
+html[data-theme='dark'] .token.deleted {
+  color: #f97316;
+}
+
+html[data-theme='dark'] .token.selector,
+html[data-theme='dark'] .token.attr-name,
+html[data-theme='dark'] .token.string,
+html[data-theme='dark'] .token.char,
+html[data-theme='dark'] .token.builtin,
+html[data-theme='dark'] .token.inserted {
+  color: #22c55e;
+}
+
+html[data-theme='dark'] .token.operator,
+html[data-theme='dark'] .token.entity,
+html[data-theme='dark'] .token.url,
+html[data-theme='dark'] .token.variable {
+  color: #eab308;
+}
+
+html[data-theme='dark'] .token.atrule,
+html[data-theme='dark'] .token.attr-value,
+html[data-theme='dark'] .token.function {
+  color: #3b82f6;
+}
+
+html[data-theme='dark'] .token.keyword {
+  color: #ef4444;
+}
+
+/* Custom styles for the Physical AI & Humanoid Robotics book */
+.module-intro {
+  background: linear-gradient(145deg, #334155, #1e293b);
+  padding: 2rem;
+  border-left: 4px solid var(--ifm-color-primary);
+  margin-bottom: 2rem;
+  border-radius: 0 8px 8px 0;
+  font-family: var(--ifm-font-family-base);
+}
+
+html[data-theme='dark'] .module-intro {
+  background: linear-gradient(145deg, #334155, #1e293b);
+  border-left: 4px solid var(--ifm-color-primary);
+}
+
+.learning-objectives {
+  background: linear-gradient(145deg, #2563eb, #1d4ed8);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #3b82f6;
+  font-family: var(--ifm-font-family-base);
+}
+
+html[data-theme='dark'] .learning-objectives {
+  background: linear-gradient(145deg, #2563eb, #1d4ed8);
+  border-left: 4px solid #3b82f6;
+}
+
+.code-example {
+  margin: 1.5rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+  font-family: var(--ifm-font-family-base);
+}
+
+.important-note {
+  background: linear-gradient(145deg, #d97706, #b45309);
+  border-left: 4px solid #fde047;
+  padding: 1rem;
+  margin: 1.5rem 0;
+  border-radius: 0 8px 8px 0;
+  font-family: var(--ifm-font-family-base);
+}
+
+html[data-theme='dark'] .important-note {
+  background: linear-gradient(145deg, #d97706, #b45309);
+  border-left: 4px solid #fde047;
+}
+
+.warning-note {
+  background: linear-gradient(145deg, #dc2626, #b91c1c);
+  border-left: 4px solid #fca5a5;
+  padding: 1rem;
+  margin: 1.5rem 0;
+  border-radius: 0 8px 8px 0;
+  font-family: var(--ifm-font-family-base);
+}
+
+html[data-theme='dark'] .warning-note {
+  background: linear-gradient(145deg, #dc2626, #b91c1c);
+  border-left: 4px solid #fca5a5;
+}
