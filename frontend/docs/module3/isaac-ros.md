@@ -3,6 +3,9 @@ sidebar_position: 2
 title: "Chapter 2: Isaac ROS"
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # Isaac ROS
 
 ## Hardware-Accelerated VSLAM and Navigation Pipelines

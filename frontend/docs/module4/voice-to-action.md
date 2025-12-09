@@ -3,6 +3,9 @@ sidebar_position: 2
 title: "Chapter 2: Voice-to-Action with OpenAI Whisper"
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # Voice-to-Action with OpenAI Whisper
 
 ## Convert Spoken Commands to ROS 2 Actions

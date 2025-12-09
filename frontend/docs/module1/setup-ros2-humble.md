@@ -3,6 +3,9 @@ sidebar_position: 2
 title: "Chapter 2: Setting Up ROS 2 Humble (Ubuntu + Jetson)"
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # Setting Up ROS 2 Humble (Ubuntu + Jetson)
 
 ## Introduction
