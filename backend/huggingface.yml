@@ -1,0 +1,32 @@
+runtime:
+  type: container
+  gpu: false  # Set to true if you need GPU acceleration
+  hardware:
+    cpu: 2xCPU
+    memory: 16GiB
+
+api:
+  endpoint: /api/v1/agent/chat
+  method: POST
+
+variables:
+  - name: GEMINI_API_KEY
+    description: Google Gemini API key
+    required: true
+  - name: GEMINI_MODEL
+    description: Google Gemini model to use
+    default: gemini-pro
+  - name: QDRANT_URL
+    description: URL for Qdrant vector database
+    required: true
+  - name: QDRANT_API_KEY
+    description: API key for Qdrant database
+    required: true
+  - name: QDRANT_COLLECTION_NAME
+    description: Name of the collection in Qdrant
+    default: book_content
+  - name: RETRIEVAL_API_URL
+    description: URL for the retrieval validation API
+    default: http://localhost:8000/api/v1/retrieval/validate
+
+space_sdk: docker

@@ -71,7 +71,7 @@ const config = {
         title: 'Physical AI & Humanoid Robotics',
         
         items: [
-         
+
           {
             type: 'docSidebar',
             sidebarId: 'tutorialSidebar',
@@ -79,11 +79,16 @@ const config = {
             position: 'left',
           },
           {
+            to: '/chatbot',
+            label: 'AI Assistant',
+            position: 'left',
+          },
+          {
             href: 'https://github.com/maheenali021/hackathon-01-AI-textbook',
             label: 'GitHub',
             position: 'right',
           },
-        
+
         ],
       },
       footer: {

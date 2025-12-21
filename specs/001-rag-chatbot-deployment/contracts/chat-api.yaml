@@ -1,0 +1,256 @@
+openapi: 3.0.3
+info:
+  title: RAG Chatbot API
+  description: API for the RAG-based chatbot that answers questions about the AI robotics textbook
+  version: 1.0.0
+  contact:
+    name: AI Robotics Textbook Team
+    email: team@example.com
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+  - url: https://api.example.com
+    description: Production server
+
+paths:
+  /api/v1/chat:
+    post:
+      summary: Send a query to the RAG chatbot
+      description: Submit a user query to the chatbot and receive a grounded response
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+      responses:
+        '200':
+          description: Successful response from the chatbot
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+        '400':
+          description: Bad request - invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/sessions:
+    post:
+      summary: Create a new conversation session
+      description: Initialize a new conversation session for maintaining context
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSessionRequest'
+      responses:
+        '201':
+          description: Session created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        '400':
+          description: Bad request - invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/health:
+    get:
+      summary: Health check endpoint
+      description: Check the health status of the chatbot service
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+components:
+  schemas:
+    ChatRequest:
+      type: object
+      required:
+        - query
+      properties:
+        query:
+          type: string
+          description: The user's question or query
+          example: "What is the difference between forward and inverse kinematics?"
+        context_type:
+          type: string
+          enum: [general, chapter-specific, selected-text]
+          description: Type of query context
+          example: "general"
+        selected_text:
+          type: string
+          description: Optional selected text to constrain the query
+          example: "Forward kinematics is the process of determining the position and orientation of the end-effector based on the joint angles."
+        chapter_reference:
+          type: string
+          description: Optional chapter/section reference for context
+          example: "Chapter 3: Kinematics"
+        session_id:
+          type: string
+          description: Optional session ID to maintain conversation context
+          example: "sess_12345"
+
+    ChatResponse:
+      type: object
+      required:
+        - response
+        - sources
+        - session_id
+        - query_id
+      properties:
+        response:
+          type: string
+          description: The chatbot's response to the query
+          example: "Forward kinematics determines the end-effector position from joint angles, while inverse kinematics determines the joint angles needed to achieve a desired end-effector position."
+        sources:
+          type: array
+          items:
+            $ref: '#/components/schemas/SourceAttribution'
+          description: List of sources used in the response
+        confidence_score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Confidence score for the response
+          example: 0.95
+        session_id:
+          type: string
+          description: The session ID for the conversation
+          example: "sess_12345"
+        query_id:
+          type: string
+          description: The unique ID for this query
+          example: "query_67890"
+
+    CreateSessionRequest:
+      type: object
+      properties:
+        context_type:
+          type: string
+          enum: [general, chapter-specific, selected-text]
+          description: Default context type for the session
+          example: "general"
+        initial_context:
+          type: string
+          description: Optional initial context for the session
+          example: "Chapter 3: Kinematics"
+
+    SessionResponse:
+      type: object
+      required:
+        - session_id
+      properties:
+        session_id:
+          type: string
+          description: The unique ID for the new session
+          example: "sess_12345"
+        created_at:
+          type: string
+          format: date-time
+          description: When the session was created
+          example: "2023-10-20T10:00:00Z"
+
+    SourceAttribution:
+      type: object
+      required:
+        - document_id
+        - content_snippet
+      properties:
+        document_id:
+          type: string
+          description: Unique identifier for the source document
+          example: "doc_001"
+        chapter:
+          type: string
+          description: Chapter where the content was found
+          example: "Chapter 3: Kinematics"
+        section:
+          type: string
+          description: Section where the content was found
+          example: "3.2 Forward Kinematics"
+        page_reference:
+          type: string
+          description: Page number or location reference
+          example: "Page 45"
+        content_snippet:
+          type: string
+          description: Brief snippet of the referenced content
+          example: "Forward kinematics is the process of determining the position and orientation of the end-effector based on the joint angles."
+        relevance_score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Relevance score for this source (0-1)
+          example: 0.92
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code
+          example: "INVALID_INPUT"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Query cannot be empty"
+        details:
+          type: object
+          description: Additional error details
+          example: {"field": "query"}
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - service
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unavailable]
+          description: Health status of the service
+          example: "healthy"
+        service:
+          type: string
+          description: Name of the service
+          example: "rag-chatbot-api"
+        version:
+          type: string
+          description: Version of the service
+          example: "1.0.0"
+        timestamp:
+          type: string
+          format: date-time
+          description: When the health check was performed
+          example: "2023-10-20T10:00:00Z"

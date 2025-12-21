@@ -1,0 +1,327 @@
+openapi: 3.0.3
+info:
+  title: RAG Agent API
+  description: API for the RAG Agent Backend that connects OpenAI Agents SDK with the validated retrieval pipeline to answer questions about the AI robotics textbook.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+  - url: https://api.example.com
+    description: Production server
+
+paths:
+  /chat:
+    post:
+      summary: Send a message to the RAG agent
+      description: Send a user query to the agent and receive a response grounded in book content
+      operationId: chat_with_agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentRequest'
+      responses:
+        '200':
+          description: Successful response from the agent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentResponse'
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /chat/session:
+    post:
+      summary: Create a new conversation session
+      description: Initialize a new conversation session for multi-turn interactions
+      operationId: create_session
+      responses:
+        '200':
+          description: Session created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationSession'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /chat/session/{sessionId}/reset:
+    post:
+      summary: Reset a conversation session
+      description: Clear the conversation history and start fresh
+      operationId: reset_session
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique identifier for the conversation session
+      responses:
+        '200':
+          description: Session reset successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationSession'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    AgentRequest:
+      type: object
+      required:
+        - query_text
+      properties:
+        query_text:
+          type: string
+          description: The user's question or query
+          example: "What are the key principles of reinforcement learning?"
+          minLength: 1
+          maxLength: 1000
+        context_mode:
+          type: string
+          enum: [retrieval_pipeline, user_provided]
+          description: Whether to use the retrieval pipeline or user-provided context
+          default: retrieval_pipeline
+        user_context:
+          type: string
+          description: Text provided by user for context-only mode
+          example: "In the chapter about neural networks..."
+          maxLength: 10000
+        filters:
+          type: object
+          description: Metadata filters (e.g., chapter, section) for retrieval pipeline
+          properties:
+            chapter:
+              type: string
+              description: Chapter to filter by
+              example: "Chapter 3"
+            section:
+              type: string
+              description: Section to filter by
+              example: "Introduction"
+        conversation_id:
+          type: string
+          format: uuid
+          description: ID for maintaining conversation state
+        thread_id:
+          type: string
+          description: OpenAI thread ID for assistant memory
+
+    AgentResponse:
+      type: object
+      required:
+        - response_text
+        - sources
+        - confidence_score
+        - grounding_validation
+        - conversation_id
+        - timestamp
+      properties:
+        response_text:
+          type: string
+          description: The agent's response to the user
+          example: "Reinforcement learning is a type of machine learning where an agent learns to make decisions by taking actions in an environment to maximize cumulative reward..."
+          maxLength: 10000
+        sources:
+          type: array
+          description: List of sources used in the response
+          items:
+            $ref: '#/components/schemas/SourceAttribution'
+        confidence_score:
+          type: number
+          format: float
+          description: Agent's confidence in the response
+          minimum: 0.0
+          maximum: 1.0
+          example: 0.85
+        grounding_validation:
+          $ref: '#/components/schemas/GroundingValidation'
+        conversation_id:
+          type: string
+          format: uuid
+          description: ID for the conversation thread
+        timestamp:
+          type: string
+          format: date-time
+          description: When response was generated
+
+    SourceAttribution:
+      type: object
+      required:
+        - content_id
+        - source_url
+        - chapter
+      properties:
+        content_id:
+          type: string
+          description: ID of the content chunk used
+          example: "chunk_12345"
+        source_url:
+          type: string
+          format: uri
+          description: URL of the source
+          example: "https://book.example.com/chapter3"
+        chapter:
+          type: string
+          description: Chapter where content was found
+          example: "Chapter 3: Reinforcement Learning"
+        section:
+          type: string
+          description: Section where content was found
+          example: "3.1 Basic Concepts"
+
+    GroundingValidation:
+      type: object
+      required:
+        - is_fully_grounded
+      properties:
+        is_fully_grounded:
+          type: boolean
+          description: Whether response is fully grounded in retrieved content
+          example: true
+        unsupported_claims:
+          type: array
+          description: Any unsupported claims in the response
+          items:
+            type: string
+          example: []
+
+    ConversationSession:
+      type: object
+      required:
+        - session_id
+        - openai_thread_id
+        - created_at
+        - last_interaction
+        - context_mode
+      properties:
+        session_id:
+          type: string
+          format: uuid
+          description: Unique identifier for the conversation session
+        openai_thread_id:
+          type: string
+          description: OpenAI's thread ID for assistant memory
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when session was created
+        last_interaction:
+          type: string
+          format: date-time
+          description: Timestamp of last interaction
+        user_id:
+          type: string
+          description: ID of the user (for logged-in sessions)
+        context_mode:
+          type: string
+          enum: [retrieval_pipeline, user_provided]
+          description: Current context mode for the session
+        active_filters:
+          type: object
+          description: Active filters applied to the session
+          properties:
+            chapter:
+              type: string
+              description: Active chapter filter
+            section:
+              type: string
+              description: Active section filter
+        conversation_history:
+          type: array
+          description: History of exchanges in the conversation
+          items:
+            $ref: '#/components/schemas/ConversationMessage'
+
+    ConversationMessage:
+      type: object
+      required:
+        - role
+        - content
+        - timestamp
+      properties:
+        role:
+          type: string
+          enum: [user, assistant]
+          description: Role of the message
+        content:
+          type: string
+          description: The message content
+        timestamp:
+          type: string
+          format: date-time
+          description: When the message was exchanged
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code
+          example: "VALIDATION_ERROR"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Query text is required and must be between 1 and 1000 characters"
+        details:
+          type: object
+          description: Additional error details (optional)
+          example: {"field": "query_text"}
+
+  parameters:
+    sessionId:
+      name: sessionId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Unique identifier for the conversation session
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: API key authentication for the RAG Agent API
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: chat
+    description: Chat and conversation management endpoints
+  - name: sessions
+    description: Conversation session management

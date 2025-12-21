@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(dir \"C:\\Users\\Dell\\Desktop\\maheen\\agents\\hackathon-01-AI-textbook\\.specify\\memory\"\")"
+      "Bash(dir \"C:\\Users\\Dell\\Desktop\\maheen\\agents\\hackathon-01-AI-textbook\\.specify\\memory\"\")",
+      "Bash(netstat -ano)",
+      "Bash(findstr :3000)"
     ],
     "deny": [],
     "ask": []

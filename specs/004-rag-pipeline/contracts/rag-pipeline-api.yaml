@@ -1,0 +1,371 @@
+openapi: 3.0.0
+info:
+  title: RAG Pipeline API
+  description: API for the RAG (Retrieval-Augmented Generation) pipeline that extracts, chunks, embeds, and stores book content for semantic search
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+
+paths:
+  /extract:
+    post:
+      summary: Extract content from a website URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - url
+              properties:
+                url:
+                  type: string
+                  format: uri
+                  description: URL of the website to extract content from
+                selector:
+                  type: string
+                  description: CSS selector for content extraction (optional)
+      responses:
+        '200':
+          description: Content extracted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Unique identifier for the extracted content
+                  url:
+                    type: string
+                    format: uri
+                    description: Source URL
+                  title:
+                    type: string
+                    description: Title of the content
+                  content:
+                    type: string
+                    description: Extracted text content
+                  metadata:
+                    type: object
+                    description: Additional metadata about the content
+        '400':
+          description: Invalid URL or extraction failed
+        '500':
+          description: Internal server error during extraction
+
+  /chunk:
+    post:
+      summary: Chunk content into semantically meaningful units
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+              properties:
+                content:
+                  type: string
+                  description: Content to be chunked
+                max_chunk_size:
+                  type: integer
+                  default: 500
+                  description: Maximum number of words per chunk
+                overlap_ratio:
+                  type: number
+                  default: 0.1
+                  description: Overlap ratio between chunks (0-1)
+                semantic_boundaries:
+                  type: boolean
+                  default: true
+                  description: Whether to respect semantic boundaries (headings, paragraphs)
+      responses:
+        '200':
+          description: Content chunked successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  chunks:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: Unique chunk identifier
+                        content:
+                          type: string
+                          description: Chunked text content
+                        chunk_index:
+                          type: number
+                          description: Position in the original content
+                        semantic_boundary:
+                          type: string
+                          description: Type of semantic boundary (h1, h2, h3, etc.)
+                        word_count:
+                          type: number
+                          description: Word count of the chunk
+                        char_count:
+                          type: number
+                          description: Character count of the chunk
+        '400':
+          description: Invalid input or chunking failed
+        '500':
+          description: Internal server error during chunking
+
+  /embed:
+    post:
+      summary: Generate embeddings for content chunks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - chunks
+              properties:
+                chunks:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - id
+                      - content
+                    properties:
+                      id:
+                        type: string
+                        description: Chunk identifier
+                      content:
+                        type: string
+                        description: Text content to embed
+                model:
+                  type: string
+                  default: "embed-multilingual-v3.0"
+                  description: Embedding model to use
+      responses:
+        '200':
+          description: Embeddings generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  embeddings:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: Unique identifier for the vector record
+                        chunk_id:
+                          type: string
+                          description: Reference to the original chunk
+                        vector:
+                          type: array
+                          items:
+                            type: number
+                          description: The embedding vector values
+                        model:
+                          type: string
+                          description: Embedding model used
+                        model_version:
+                          type: string
+                          description: Version of the embedding model
+                        timestamp:
+                          type: string
+                          format: date-time
+                          description: When the embedding was generated
+        '400':
+          description: Invalid input or embedding failed
+        '429':
+          description: Rate limit exceeded
+        '500':
+          description: Internal server error during embedding
+
+  /store:
+    post:
+      summary: Store embeddings in vector database
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - vectors
+              properties:
+                vectors:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - chunk_id
+                      - vector
+                      - content
+                      - source_url
+                      - chapter
+                      - section
+                    properties:
+                      chunk_id:
+                        type: string
+                        description: Reference to the original chunk
+                      vector:
+                        type: array
+                        items:
+                          type: number
+                        description: The embedding vector values
+                      content:
+                        type: string
+                        description: The original text chunk
+                      source_url:
+                        type: string
+                        format: uri
+                        description: URL where content was found
+                      chapter:
+                        type: string
+                        description: Chapter name/number
+                      section:
+                        type: string
+                        description: Section name/number
+                      word_count:
+                        type: number
+                        description: Word count of the chunk
+                      chunk_index:
+                        type: number
+                        description: Position in the original content
+      responses:
+        '200':
+          description: Embeddings stored successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Whether the storage was successful
+                  stored_count:
+                    type: number
+                    description: Number of vectors successfully stored
+                  failed_count:
+                    type: number
+                    description: Number of vectors that failed to store
+        '400':
+          description: Invalid input or storage failed
+        '500':
+          description: Internal server error during storage
+
+  /query:
+    post:
+      summary: Query the vector database for similar content
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - query
+              properties:
+                query:
+                  type: string
+                  description: Query text to find similar content
+                top_k:
+                  type: number
+                  default: 5
+                  description: Number of results to return
+                filters:
+                  type: object
+                  description: Filters to apply to the search
+                  properties:
+                    chapter:
+                      type: string
+                      description: Filter by specific chapter
+                    section:
+                      type: string
+                      description: Filter by specific section
+      responses:
+        '200':
+          description: Query executed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        chunk_id:
+                          type: string
+                          description: Reference to the matched chunk
+                        content:
+                          type: string
+                          description: The matched text content
+                        source_url:
+                          type: string
+                          format: uri
+                          description: URL where content was found
+                        chapter:
+                          type: string
+                          description: Chapter name/number
+                        section:
+                          type: string
+                          description: Section name/number
+                        similarity_score:
+                          type: number
+                          description: Similarity score (0-1)
+                        word_count:
+                          type: number
+                          description: Word count of the chunk
+                  query:
+                    type: string
+                    description: The original query text
+                  execution_time:
+                    type: number
+                    description: Time taken to execute the query in milliseconds
+        '400':
+          description: Invalid query or search failed
+        '500':
+          description: Internal server error during search
+
+  /pipeline/status:
+    get:
+      summary: Get the status of the RAG pipeline
+      responses:
+        '200':
+          description: Pipeline status retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [running, idle, error, completed]
+                    description: Current status of the pipeline
+                  progress:
+                    type: number
+                    description: Progress percentage (0-100)
+                  total_chunks:
+                    type: number
+                    description: Total number of chunks processed
+                  completed_chunks:
+                    type: number
+                    description: Number of chunks successfully processed
+                  error_count:
+                    type: number
+                    description: Number of errors during processing
+                  last_updated:
+                    type: string
+                    format: date-time
+                    description: When the status was last updated
