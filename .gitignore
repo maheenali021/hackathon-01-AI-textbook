@@ -151,4 +151,7 @@ $RECYCLE.BIN/
 *.msix
 *.msm
 *.msp
-*.lnk
+*.lnknul/
+.mypy_cache/
+__pycache__/
+.pytest_cache/
