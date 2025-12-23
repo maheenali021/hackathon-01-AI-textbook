@@ -1,45 +1,64 @@
-# RAG Agent API for AI Robotics Textbook
+# AI Robotics Textbook RAG Agent
 
-This is a RAG (Retrieval-Augmented Generation) agent API that answers questions about the AI Robotics textbook using Google Gemini and Qdrant vector database.
+This is a Retrieval-Augmented Generation (RAG) agent that provides answers based on the AI Robotics textbook content. The system uses OpenRouter API for language modeling and Qdrant for vector storage and semantic search.
+
+## About
+
+This RAG system allows users to ask questions about the AI Robotics textbook and receive accurate answers based on the book's content with proper source attribution.
+
+## Features
+
+- Semantic search through textbook content
+- Context-aware question answering
+- Source attribution for all responses
+- Session management for conversations
+- Hallucination prevention through grounding
 
 ## API Endpoints
 
-- `GET /` - Root endpoint with API information
-- `POST /api/v1/agent/chat` - Chat endpoint for querying the RAG agent
-- `POST /api/v1/agent/session` - Create conversation session
-- `GET /api/v1/agent/session/{session_id}` - Get conversation session details
-- `DELETE /api/v1/agent/session/{session_id}` - Clear conversation session
-- `GET /api/v1/agent/health` - Health check endpoint
+-  - Main chat endpoint for asking questions
+-  - Create a new conversation session
+-  - Get conversation history
+-  - Clear conversation history
+-  - Health check endpoint
 
 ## Environment Variables
 
-The following environment variables need to be set:
+This application requires the following environment variables to be set:
 
-- `GEMINI_API_KEY` - Your Google Gemini API key
-- `GEMINI_MODEL` - Google Gemini model to use (default: gemini-pro)
-- `QDRANT_URL` - URL for Qdrant vector database
-- `QDRANT_API_KEY` - API key for Qdrant database
-- `QDRANT_COLLECTION_NAME` - Name of the collection in Qdrant (default: book_content)
-- `RETRIEVAL_API_URL` - URL for the retrieval validation API
+-  - Your OpenRouter API key (required)
+-  - Qdrant vector database URL (required)
+-  - Qdrant API key (required) 
+-  - Name of the Qdrant collection (default: book_content)
+-  - Cohere API key for embeddings (required)
 
 ## Usage
 
-1. Set the required environment variables
-2. Start the server: `uvicorn app:app --reload`
-3. Send POST requests to `/api/v1/agent/chat` with JSON payload:
-   ```json
-   {
-     "query": "Your question here",
-     "query_type": "general",
-     "chapter_filter": null,
-     "user_context": null,
-     "conversation_id": null
-   }
-   ```
+Send a POST request to  with a JSON body containing a  field:
+
+```json
+{
+  "query": "What is this book about?"
+}
+```
+
+## Example Response
+
+```json
+{
+  "response": "The book is about Physical AI & Humanoid Robotics...", 
+  "query": "What is this book about?",
+  "retrieved_chunks": [...],
+  "source_attribution": [...],
+  "confidence_score": 0.46,
+  "has_sufficient_context": true
+}
+```
 
 ## Deployment
 
-This application can be deployed to various platforms including:
-- Hugging Face Spaces (using the app.py entry point)
-- Cloud platforms like AWS, GCP, Azure
-- Containerized environments with Docker
+This application is designed for deployment on Hugging Face Spaces using Docker.
+
+## License
+
+This project is licensed under the terms specified in the original repository.

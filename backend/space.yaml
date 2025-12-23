@@ -1,0 +1,24 @@
+type: inference
+hardware:
+  cpu: 2xCPU
+  memory: 16GiB
+  accelerate: false
+env:
+  - OPENROUTER_API_KEY=
+  - QDRANT_URL=
+  - QDRANT_API_KEY=
+  - QDRANT_COLLECTION_NAME=book_content
+  - COHERE_API_KEY=
+ports:
+  - 7860
+secrets:
+  - OPENROUTER_API_KEY
+  - QDRANT_API_KEY
+  - COHERE_API_KEY
+variables:
+  - QDRANT_URL
+  - QDRANT_COLLECTION_NAME
+runners:
+  - runner: python
+    command: ["python", "run_server.py"]
+

@@ -148,27 +148,35 @@ class RetrievalService:
                 if filter_conditions:
                     qdrant_filters = Filter(must=filter_conditions)
 
-            # Perform the search
-            search_results = self.qdrant_client.search(
+            # Perform the search - using the modern Qdrant API format (query_points instead of search)
+            search_results = self.qdrant_client.query_points(
                 collection_name=self.collection_name,
-                query_vector=query_embedding,
+                query=query_embedding,
                 query_filter=qdrant_filters,
-                limit=top_k,
-                with_payload=True,
-                with_vectors=False
+                limit=top_k
             )
 
             # Convert search results to RetrievalResult objects
+            # With the new API, search_results.points is the actual list of results
             results = []
-            for result in search_results:
+            for result in search_results.points:  # Changed from search_results to search_results.points
                 payload = result.payload or {}
+
+                # Log payload structure to understand the data
+                self.logger.info(f"Qdrant result payload keys: {list(payload.keys()) if payload else 'empty'}")
+
+                # Extract content with fallbacks for different possible field names
+                content = payload.get("content", payload.get("text", payload.get("body", "")))
+                source_url = payload.get("source_url", payload.get("url", payload.get("source", "")))
+                chapter = payload.get("chapter", payload.get("chapter_title", None))
+                section = payload.get("section", payload.get("section_title", None))
 
                 retrieval_result = RetrievalResult(
                     id=result.id,
-                    content=payload.get("content", ""),
-                    source_url=payload.get("source_url", ""),
-                    chapter=payload.get("chapter"),
-                    section=payload.get("section"),
+                    content=content,
+                    source_url=source_url,
+                    chapter=chapter,
+                    section=section,
                     similarity_score=result.score,
                     confidence_score=result.score,  # Using similarity score as confidence for now
                     retrieval_timestamp=datetime.now()

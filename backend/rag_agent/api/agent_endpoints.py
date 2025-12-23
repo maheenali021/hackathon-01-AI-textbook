@@ -16,7 +16,7 @@ from ..utils.validation_utils import ResponseValidator
 logger = logging.getLogger(__name__)
 
 # Create API router
-router = APIRouter(prefix="/api/v1/agent", tags=["agent"])
+router = APIRouter(prefix="/api/v1", tags=["agent"])
 
 # Initialize agent service
 agent_service = AgentService()
@@ -110,12 +110,12 @@ async def health_check():
     Health check endpoint for the agent service
     """
     try:
-        # Check if OpenAI client is initialized
-        if agent_service.client is None:
+        # Check if OpenRouter client is initialized
+        if not hasattr(agent_service, 'client'):
             return {
                 "status": "unhealthy",
                 "service": "agent-service",
-                "details": "OpenAI client not initialized",
+                "details": "OpenRouter client not initialized",
                 "timestamp": time.time()
             }
 

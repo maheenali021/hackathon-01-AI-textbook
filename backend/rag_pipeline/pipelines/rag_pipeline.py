@@ -41,8 +41,14 @@ class RAGPipeline:
         """
         self.logger.info("Starting complete RAG pipeline")
 
-        # Initialize the Qdrant collection schema
-        self.qdrant_schema_manager.create_book_content_schema()
+        # Recreate the Qdrant collection schema to ensure clean state with content field
+        try:
+            # First try to recreate the collection (this will delete and create fresh)
+            self.qdrant_schema_manager.recreate_collection(vector_size=1024, confirm=True)
+        except Exception as e:
+            # If recreate fails, try to create normally
+            self.logger.warning(f"Collection recreation failed, attempting normal creation: {str(e)}")
+            self.qdrant_schema_manager.create_book_content_schema(1024)
 
         # Step 1: Extract and chunk content
         self.logger.info("Step 1: Extracting and chunking content")
@@ -130,6 +136,10 @@ class RAGPipeline:
                     # In a real implementation, we'd have access to the original BookContent
                     meta = {
                         "chunk_id": emb.chunk_id,
+                        "content": chunk.content[:500],  # Store first 500 chars as context
+                        "source_url": getattr(chunk, 'source_url', ''),
+                        "chapter": getattr(chunk, 'chapter', ''),
+                        "section": getattr(chunk, 'section', ''),
                         "book_content_id": chunk.book_content_id,
                         "chunk_index": chunk.chunk_index,
                         "word_count": chunk.word_count,

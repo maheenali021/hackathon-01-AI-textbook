@@ -19,6 +19,9 @@ class ContentChunk(BaseModel):
     semantic_boundary: Optional[str] = None
     word_count: int = 0
     char_count: int = 0
+    source_url: Optional[str] = None
+    chapter: Optional[str] = None
+    section: Optional[str] = None
     created_at: datetime = datetime.now()
     updated_at: datetime = datetime.now()
 

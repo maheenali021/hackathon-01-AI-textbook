@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 # Create FastAPI app
 app = FastAPI(
     title="RAG Agent API",
-    description="Google Gemini Agent-powered RAG system for AI Robotics textbook",
+    description="OpenRouter Agent-powered RAG system for AI Robotics textbook",
     version="1.0.0"
 )
 
@@ -54,9 +54,9 @@ async def root():
         "message": "RAG Agent API",
         "version": "1.0.0",
         "endpoints": [
-            "/api/v1/agent/chat",
-            "/api/v1/agent/session",
-            "/api/v1/agent/health"
+            "/api/v1/chat",
+            "/api/v1/session",
+            "/api/v1/health"
         ]
     }
 

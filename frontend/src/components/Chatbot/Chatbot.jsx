@@ -6,7 +6,7 @@ import './Chatbot.css';
 // Define the backend URL - this can be configured based on environment
 const BACKEND_URL = typeof window !== 'undefined' && window.REACT_APP_BACKEND_URL
   ? window.REACT_APP_BACKEND_URL
-  : 'https://maheenalishah-rag-chatbot-backend.hf.space';
+  : 'https://maheenalishah-ragtchatbot.hf.space';
 
 export const Chatbot = () => {
   const [messages, setMessages] = useState([]);

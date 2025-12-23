@@ -11,9 +11,9 @@ load_dotenv()
 class Config:
     """Configuration class containing all settings for the RAG agent"""
 
-    # Google Gemini API Configuration
-    GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
-    GEMINI_MODEL = os.getenv('GEMINI_MODEL', 'gemini-1.5-flash')
+    # OpenRouter API Configuration
+    OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
+    OPENROUTER_MODEL = os.getenv('OPENROUTER_MODEL', 'mistralai/mistral-7b-instruct')
 
     # Agent Configuration
     AGENT_NAME = os.getenv('AGENT_NAME', 'AI-Textbook-Agent')
@@ -46,7 +46,7 @@ class Config:
     def validate(cls):
         """Validate that required configuration parameters are set"""
         required_vars = [
-            'GEMINI_API_KEY',
+            'OPENROUTER_API_KEY',
         ]
 
         missing_vars = [var for var in required_vars if not getattr(cls, var)]

@@ -2,12 +2,13 @@
 Retrieval tool for the RAG Agent system
 Implements tool calling to invoke the retrieval pipeline
 """
-import requests
 import logging
 from typing import Dict, Any, List, Optional
 from datetime import datetime
+import asyncio
 
 from ..config import Config
+from rag_pipeline.validation.services.retrieval_service import RetrievalService
 
 
 class RetrievalTool:
@@ -18,6 +19,13 @@ class RetrievalTool:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.config = Config
+        # Initialize the direct retrieval service
+        try:
+            self.retrieval_service = RetrievalService()
+            self.logger.info("Direct retrieval service initialized successfully")
+        except Exception as e:
+            self.logger.error(f"Failed to initialize retrieval service: {str(e)}")
+            self.retrieval_service = None
 
     def search(self, query: str, filters: Optional[Dict[str, Any]] = None, top_k: int = 5) -> List[Dict[str, Any]]:
         """
@@ -32,81 +40,149 @@ class RetrievalTool:
             List of retrieved content chunks with metadata
         """
         try:
-            # Prepare the request to the retrieval API
-            payload = {
-                "query": query,
-                "expected_sources": None,  # Not needed for basic retrieval
-                "filters": filters,
-                "top_k": top_k
-            }
-
-            # Make request to the retrieval validation API
-            response = requests.post(
-                self.config.RETRIEVAL_API_URL,
-                json=payload,
-                headers={"Content-Type": "application/json"},
-                timeout=self.config.RETRIEVAL_TIMEOUT
-            )
-
-            if response.status_code != 200:
-                self.logger.error(f"Retrieval API returned status {response.status_code}: {response.text}")
+            if not self.retrieval_service:
+                self.logger.error("Retrieval service not initialized")
                 return []
 
-            # Parse the response
-            result = response.json()
+            # Create a validation request for the retrieval
+            from rag_pipeline.validation.models.validation_models import ValidationRequest
+            validation_request = ValidationRequest(
+                query=query,
+                expected_sources=None,  # Not needed for basic retrieval
+                filters=filters,
+                top_k=top_k
+            )
 
-            # Extract retrieved results
-            retrieved_results = result.get("retrieved_results", [])
+            # Run the retrieval asynchronously
+            import asyncio
+            try:
+                loop = asyncio.get_event_loop()
+            except RuntimeError:
+                # If there's no event loop, create a new one
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+
+            # Retrieve similar chunks using the direct service
+            retrieval_results = loop.run_until_complete(
+                self.retrieval_service.retrieve_similar_chunks(validation_request)
+            )
+
+            # Convert the RetrievalResult objects to the expected dictionary format
             processed_results = []
-
-            for item in retrieved_results:
+            for result in retrieval_results:
                 processed_item = {
-                    "id": item.get("id", ""),
-                    "content": item.get("content", ""),
-                    "source_url": item.get("source_url", ""),
-                    "chapter": item.get("chapter"),
-                    "section": item.get("section"),
-                    "similarity_score": item.get("similarity_score", 0.0),
-                    "confidence_score": item.get("confidence_score", 0.0),
-                    "retrieval_timestamp": datetime.now().isoformat(),
-                    "metadata": item.get("metadata", {})
+                    "id": result.id,
+                    "content": result.content,
+                    "source_url": result.source_url,
+                    "chapter": result.chapter,
+                    "section": result.section,
+                    "similarity_score": result.similarity_score,
+                    "confidence_score": result.confidence_score,
+                    "retrieval_timestamp": result.retrieval_timestamp.isoformat() if hasattr(result.retrieval_timestamp, 'isoformat') else str(result.retrieval_timestamp),
+                    "metadata": {}
                 }
                 processed_results.append(processed_item)
 
             self.logger.info(f"Retrieved {len(processed_results)} results for query: {query[:50]}...")
             return processed_results
 
-        except requests.exceptions.Timeout:
-            self.logger.error(f"Retrieval API request timed out after {self.config.RETRIEVAL_TIMEOUT} seconds")
-            return []
-        except requests.exceptions.RequestException as e:
-            self.logger.error(f"Error calling retrieval API: {str(e)}")
-            return []
         except Exception as e:
-            self.logger.error(f"Unexpected error in retrieval tool: {str(e)}")
+            self.logger.error(f"Error in direct retrieval: {str(e)}")
             return []
+
+    async def async_search(self, query: str, filters: Optional[Dict[str, Any]] = None, top_k: int = 5) -> List[Dict[str, Any]]:
+        """
+        Async version of search for use in async contexts
+        """
+        try:
+            if not self.retrieval_service:
+                self.logger.error("Retrieval service not initialized")
+                return []
+
+            # Create a validation request for the retrieval
+            from rag_pipeline.validation.models.validation_models import ValidationRequest
+            validation_request = ValidationRequest(
+                query=query,
+                expected_sources=None,  # Not needed for basic retrieval
+                filters=filters,
+                top_k=top_k
+            )
+
+            # Retrieve similar chunks using the direct service
+            retrieval_results = await self.retrieval_service.retrieve_similar_chunks(validation_request)
+
+            # Convert the RetrievalResult objects to the expected dictionary format
+            processed_results = []
+            for result in retrieval_results:
+                processed_item = {
+                    "id": result.id,
+                    "content": result.content,
+                    "source_url": result.source_url,
+                    "chapter": result.chapter,
+                    "section": result.section,
+                    "similarity_score": result.similarity_score,
+                    "confidence_score": result.confidence_score,
+                    "retrieval_timestamp": result.retrieval_timestamp.isoformat() if hasattr(result.retrieval_timestamp, 'isoformat') else str(result.retrieval_timestamp),
+                    "metadata": {}
+                }
+                processed_results.append(processed_item)
+
+            self.logger.info(f"Retrieved {len(processed_results)} results for query: {query[:50]}...")
+            return processed_results
+
+        except Exception as e:
+            self.logger.error(f"Error in direct retrieval: {str(e)}")
+            return []
+
+    def search(self, query: str, filters: Optional[Dict[str, Any]] = None, top_k: int = 5) -> List[Dict[str, Any]]:
+        """
+        Search for relevant content using the retrieval pipeline
+        Now using a thread-safe approach for async calls
+        """
+        import concurrent.futures
+        import threading
+
+        # Check if we're already in an event loop
+        try:
+            loop = asyncio.get_running_loop()
+            # We're already in an event loop, need to use a different approach
+            # Run the async search in a separate thread
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(self._run_async_search_in_thread, query, filters, top_k)
+                return future.result()
+        except RuntimeError:
+            # No event loop running, we can use asyncio.run directly
+            return asyncio.run(self.async_search(query, filters, top_k))
+
+    def _run_async_search_in_thread(self, query: str, filters: Optional[Dict[str, Any]], top_k: int):
+        """
+        Helper method to run async search in a separate thread
+        """
+        # Create a new event loop for the thread
+        new_loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(new_loop)
+        try:
+            return new_loop.run_until_complete(self.async_search(query, filters, top_k))
+        finally:
+            new_loop.close()
 
     def validate_retrieval_connection(self) -> bool:
         """
-        Validate that the retrieval API is accessible
+        Validate that the retrieval service is accessible
         """
         try:
-            # Make a simple request to validate the connection
-            test_payload = {
-                "query": "test",
-                "expected_sources": None,
-                "filters": None,
-                "top_k": 1
-            }
+            if not self.retrieval_service:
+                return False
 
-            response = requests.post(
-                self.config.RETRIEVAL_API_URL,
-                json=test_payload,
-                headers={"Content-Type": "application/json"},
-                timeout=5  # Short timeout for validation
-            )
+            # Run the health check asynchronously
+            import asyncio
+            try:
+                loop = asyncio.get_event_loop()
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
 
-            return response.status_code == 200
+            return loop.run_until_complete(self.retrieval_service.health_check())
         except:
             return False
 

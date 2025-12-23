@@ -45,6 +45,11 @@ class ContentChunker:
             # Split content into chunks based on semantic boundaries
             chunks = self._semantic_chunking(content, chunk_size, overlap_size, book_content.id)
 
+            # Extract chapter/section information from URL or title
+            source_url = book_content.url
+            chapter = self._extract_chapter_from_url(book_content.url, book_content.title)
+            section = self._extract_section_from_title(book_content.title)
+
             # Create ContentChunk objects
             content_chunks = []
             for i, (chunk_text, boundary_type) in enumerate(chunks):
@@ -55,7 +60,10 @@ class ContentChunker:
                     chunk_index=i,
                     semantic_boundary=boundary_type,
                     word_count=len(chunk_text.split()),
-                    char_count=len(chunk_text)
+                    char_count=len(chunk_text),
+                    source_url=source_url,
+                    chapter=chapter,
+                    section=section
                 )
                 content_chunks.append(chunk)
 
@@ -293,6 +301,61 @@ class ContentChunker:
                 return False
 
         return True
+
+    def _extract_chapter_from_url(self, url: str, title: str) -> Optional[str]:
+        """
+        Extract chapter information from URL or title
+
+        Args:
+            url: The URL of the content
+            title: The title of the content
+
+        Returns:
+            Chapter name or None if not found
+        """
+        # Try to extract chapter from URL path
+        from urllib.parse import urlparse
+        parsed_url = urlparse(url)
+        path_parts = parsed_url.path.strip('/').split('/')
+
+        # Look for common chapter-like patterns in URL
+        for part in path_parts:
+            # Look for patterns like 'module1', 'chapter2', 'docs/module1', etc.
+            if any(keyword in part.lower() for keyword in ['module', 'chapter', 'lesson', 'part']):
+                return part
+
+        # If no chapter found in URL, try to extract from title
+        lower_title = title.lower()
+        if 'module' in lower_title or 'chapter' in lower_title:
+            # Try to extract chapter/module info from title
+            import re
+            chapter_match = re.search(r'(?:module|chapter|lesson)\s*(\d+(?:\.\d+)?)', title, re.IGNORECASE)
+            if chapter_match:
+                return f"Module {chapter_match.group(1)}"
+
+        return None
+
+    def _extract_section_from_title(self, title: str) -> Optional[str]:
+        """
+        Extract section information from title
+
+        Args:
+            title: The title of the content
+
+        Returns:
+            Section name or None if not found
+        """
+        # Remove common chapter/module prefixes to get the actual section title
+        import re
+        # Remove chapter/module prefixes
+        clean_title = re.sub(r'^(?:module\s*\d+[\.\-\s]*)|(?:chapter\s*\d+[\.\-\s]*)|(?:lesson\s*\d+[\.\-\s]*)', '', title, flags=re.IGNORECASE)
+        clean_title = clean_title.strip()
+
+        # Return the cleaned title as section if it's meaningful
+        if clean_title and len(clean_title) > 2:
+            return clean_title
+
+        return None
 
     def calculate_chunk_metrics(self, content_chunks: List[ContentChunk]) -> dict:
         """

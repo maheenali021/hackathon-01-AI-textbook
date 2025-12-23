@@ -1,11 +1,11 @@
 """
 Agent service for the RAG Agent system
-Implements the Google Gemini Agent with tool calling capabilities for retrieval
+Implements the OpenRouter Agent with tool calling capabilities for retrieval
 """
 import asyncio
 import logging
 from typing import Dict, Any, List, Optional
-import google.generativeai as genai
+import openai
 import requests
 import json
 from datetime import datetime
@@ -42,20 +42,21 @@ class AgentService:
             self.logger.error(f"Configuration validation failed: {e}")
             raise
 
-        # Initialize Google Gemini client
-        self._initialize_gemini_client()
+        # Initialize OpenRouter client
+        self._initialize_openrouter_client()
 
-    def _initialize_gemini_client(self):
-        """Initialize the Google Gemini client with configuration"""
+    def _initialize_openrouter_client(self):
+        """Initialize the OpenRouter client with configuration"""
         try:
-            if not self.config.GEMINI_API_KEY:
-                raise ValueError("GEMINI_API_KEY environment variable is not set")
+            if not self.config.OPENROUTER_API_KEY:
+                raise ValueError("OPENROUTER_API_KEY environment variable is not set")
 
-            genai.configure(api_key=self.config.GEMINI_API_KEY)
-            self.client = genai.GenerativeModel(self.config.GEMINI_MODEL)
-            self.logger.info("Google Gemini client initialized successfully")
+            # Configure OpenAI client to use OpenRouter
+            openai.base_url = "https://openrouter.ai/api/v1"
+            openai.api_key = self.config.OPENROUTER_API_KEY
+            self.logger.info("OpenRouter client initialized successfully")
         except Exception as e:
-            self.logger.error(f"Failed to initialize Google Gemini client: {str(e)}")
+            self.logger.error(f"Failed to initialize OpenRouter client: {str(e)}")
             raise
 
     def create_conversation_session(self) -> ConversationSession:
@@ -150,43 +151,28 @@ class AgentService:
             4. Be helpful and informative
             """
 
-            # Call Google Gemini API to generate response
+            # Call OpenRouter API to generate response
             try:
-                # Check if client is a mock (during testing)
-                if hasattr(self.client, 'generate_content') and hasattr(self.client.generate_content, 'side_effect'):
-                    # This is likely a mock, so call it directly
-                    response = self.client.generate_content(
-                        prompt,
-                        generation_config={
-                            "temperature": 0.3,
-                            "max_output_tokens": self.config.MAX_RESPONSE_TOKENS,
-                        }
-                    )
+                # Real OpenRouter API call
+                response = openai.chat.completions.create(
+                    model=self.config.OPENROUTER_MODEL,
+                    messages=[
+                        {"role": "system", "content": self.config.AGENT_INSTRUCTIONS},
+                        {"role": "user", "content": f"Context: {context}\n\nUser Query: {query}"}
+                    ],
+                    temperature=0.3,  # Lower temperature for more factual responses
+                    max_tokens=self.config.MAX_RESPONSE_TOKENS,
+                )
 
-                    # Handle mock response appropriately
-                    if hasattr(response, 'text'):
-                        generated_response = response.text.strip()
-                    elif str(type(response)) == "<class 'unittest.mock.Mock'>" or hasattr(response, 'return_value'):
-                        # If it's still a mock object, get its text attribute or convert to string
-                        if hasattr(response, 'text') and response.text:
-                            generated_response = response.text.strip()
-                        else:
-                            generated_response = f"Test response for query: {query[:50]}..."
-                    else:
-                        generated_response = str(response).strip()
+                # Handle the response properly
+                if hasattr(response, 'choices') and len(response.choices) > 0:
+                    generated_response = response.choices[0].message.content.strip()
                 else:
-                    # Real API call
-                    response = self.client.generate_content(
-                        prompt,
-                        generation_config={
-                            "temperature": 0.3,  # Lower temperature for more factual responses
-                            "max_output_tokens": self.config.MAX_RESPONSE_TOKENS,
-                        }
-                    )
-                    generated_response = response.text.strip()
+                    self.logger.warning("OpenRouter response has no choices, using fallback")
+                    generated_response = f"Response for query: {query[:50]}..."
 
             except Exception as e:
-                self.logger.warning(f"Gemini API call failed, using fallback: {str(e)}")
+                self.logger.warning(f"OpenRouter API call failed, using fallback: {str(e)}")
                 # Fallback to a response for testing purposes
                 generated_response = f"Response for query: {query[:50]}..."
 
