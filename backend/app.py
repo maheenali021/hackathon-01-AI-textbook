@@ -18,11 +18,17 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Set up logging
+import sys
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.StreamHandler(sys.stdout),  # Ensure logs go to console
+        logging.FileHandler("app.log")      # Optional: also log to file
+    ]
 )
 logger = logging.getLogger(__name__)
+logger.info("Logging configured successfully for main app")
 
 # Create FastAPI app
 app = FastAPI(
@@ -30,6 +36,14 @@ app = FastAPI(
     description="Google Gemini Agent-powered RAG system for AI Robotics textbook",
     version="1.0.0"
 )
+
+# Add request logging middleware
+@app.middleware("http")
+async def log_requests(request, call_next):
+    logger.info(f"Request: {request.method} {request.url.path}")
+    response = await call_next(request)
+    logger.info(f"Response status: {response.status_code}")
+    return response
 
 # Add CORS middleware
 from fastapi.middleware.cors import CORSMiddleware
@@ -42,7 +56,7 @@ app.add_middleware(
 )
 
 # Include API routers
-app.include_router(agent_router)
+app.include_router(agent_router, prefix="/api/v1")
 
 # Root endpoint
 @app.get("/")
@@ -68,8 +82,8 @@ def query_agent(query: str) -> str:
     # Use the same logic as the API but for Gradio
     try:
         # This simulates the API call internally
-        from rag_agent.services.agent_service import AgentService
-        agent_service = AgentService()
+        from rag_agent.services.rag_agent_service import RAGAgentService
+        agent_service = RAGAgentService()
         
         from rag_agent.models.agent_models import AgentRequest
         request = AgentRequest(query=query)
@@ -84,6 +98,6 @@ if __name__ == "__main__":
     uvicorn.run(
         "app:app",
         host="0.0.0.0",
-        port=int(os.getenv("PORT", 7860)),  # Hugging Face uses PORT environment variable
+        port=int(os.getenv("PORT", 8000)),  
         reload=Config.FASTAPI_DEBUG
     )
